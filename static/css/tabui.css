@@ -1,0 +1,108 @@
+
+    ul, li { list-style: none; }
+    
+    /*default*/
+    #tabmenu div, ul, li, table {
+      font: 12px/1.5 "Electrolize", Arial, Tahoma;
+      margin: 0px;
+      padding: 0px;
+    }
+
+    #result_view {
+      font: 12px/1.5 "Electrolize", Arial, Tahoma;
+      margin: 0px;
+      padding: 0px;
+        /*
+        text-align: center;
+        color:white;
+         */
+    }
+
+    .tabs {
+      width: 800px;
+      height: 160px;
+      margin: 40px auto;
+      border: 3px solid #333;
+    }
+    
+    .tabsTit, .tabsCon { overflow: hidden; }
+    
+    .tabsTit {
+      text-align: center;
+      color: #B3AAB4;
+    }
+    
+    .tabsTit li {
+      float: left;
+      width: 200px;
+      height: 28px;
+      line-height: 28px;
+      cursor: pointer;
+      background: #262626;
+      border-bottom: 2px solid #666666;
+    }
+    
+    .tabsTit .tabsHover {
+      background: #1E1E1E;
+      border-bottom: 2px solid #A11E22;
+    }
+    
+    .tabsCon {
+      width: 800px;
+      height: 230px;
+      background: black;
+      color: #B3AAB4;
+    }
+    
+    .tabsCon li {
+      width: 760px;
+      height: 110px;
+      padding: 10px;
+    }
+    
+    /*custom*/
+    
+    .custom {
+      width: 1000px;
+      height: 160px;
+      margin-top: 10px;
+     /* border: 3px solid #121420; */
+    }
+    
+    .customTit, .customCon { overflow: hidden; }
+    
+    .customTit {
+      text-align: center;
+      color: #B3AAB4;
+      margin-bottom : 0px;
+    }
+    
+    .customTit li {
+      float: left;
+      width: 200px;
+      height: 30px;
+      line-height: 30px;
+      cursor: pointer;
+      background: #272C40;
+      color: #FFF;
+    }
+    
+    .customTit .customHover { background: #607C9C; }
+    
+    .customCon {
+      /*width: 1200px;*/
+      /*width: 1600px;*/
+        width: 1800px;
+      height: 230px;
+      /* background: #1D2130; */
+      background : #f8f9fa;
+      color: #B3AAB4;      
+    }
+    
+    .customCon li {
+      /*width: 1140px;*/
+      /*width: 1600px;*/
+        width: 1800px;
+      height: 110px;
+      padding: 10px;
+    }

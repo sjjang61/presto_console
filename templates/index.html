@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DataGrip Faker</title>
+
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='bootstrap/bootstrap.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/jqueryscripttop.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/tabui.css') }}">
+
+    <script src="{{ url_for('static', filename='jquery/jquery-1.8.3.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='jquery/jquery-1.8.3.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='ace/ace.js') }}"></script>
+    <script src="{{ url_for('static', filename='ace/theme-twilight.js') }}"></script>
+    <script src="{{ url_for('static', filename='ace/mode-ruby.js') }}"></script>
+    <script src="{{ url_for('static', filename='jquery-ace.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/Ublue-jQueryTabs-1.2.js') }}"></script>
+    <script src="{{ url_for('static', filename='bootstrap/bootstrap.bundle.min.js') }}"></script>
+
+
+    <style>
+
+        .schema_line {
+            height: 40px;
+        }
+
+        .schema_title {
+            display: inline-block;
+            min-width : 100px;
+        }
+
+        .schema_line select {
+            width : 300px;
+            height : 30px;
+        }
+
+        .schema_line textarea {
+            width : 300px;
+            height : 80px;
+        }
+        ol, ul { padding-left : 0 !important;}
+
+        /*
+        .title { width: 150px; display: inline-block; }
+        select { width: 300px ; height : 25px ;}
+        textarea { width: 300px ; height : 100px ;}
+        table, th, td { border : 1px solid #444444; width:90% ; cellpadding : 10px; cellspacing: 10px; table-layout: fixed; }
+        thead { background-color: #9b9b9b }
+        */
+
+        table, th, td { border : 1px solid #444444; cellpadding : 10px; cellspacing: 10px; table-layout: fixed; text-align: center; height:25px;}
+        thead { font-weight: bold; color: black; background-color: lightgrey; }
+
+        #dataframe2 .table_head {
+            display:grid;
+            grid-template-columns: repeat(40, auto);
+            border: 1px solid #444444;
+            background: lightgrey;
+            font-weight: bold;
+            text-align: center
+        }
+        #dataframe2 .table_body {
+            display:grid;
+            margin-top:0px;
+            grid-template-columns: repeat(40, auto);
+            border-left: 1px solid #444444;
+            border-right: 1px solid #444444;
+            border-bottom: 1px solid #444444;
+            text-align: center;
+        }
+
+        #dataframe2 li {
+            border-right: 1px solid #444444;
+            width: 150px;
+            height: 50px;
+            padding-top: 3px;
+            overflow-x : auto;
+        }
+
+    </style>
+</head>
+
+<body style="margin:20px">
+
+    <!-- sql input -->
+    <textarea id="editor" class="my-code-area" rows="7" style="width: 100%">select * from hive.probit.t_dm_age where 1 = 1 limit 20
+    </textarea>
+
+    <!--
+    <div id="menu" style="height:100px; background: linear-gradient(#00529a,#006dcd);">
+    </div>
+    -->
+
+    <div style="margin:5px; float:right;">
+        <button type="button" class="btn btn-primary" id="run_sql" style="font-size:12px;">Run</button>
+    </div>
+
+    <!--custom tabmenu -->
+    <div id="tabmenu" class="custom" style="width:100%; display:table-cell;">
+        <ul class="customTit" style="width:100%; display:table-cell;">
+            <li class="customTab customHover">Schema</li>
+            <li class="customTab">History</li>
+            <li class="customTab">Title3</li>
+            <li class="customTab">Title4</li>
+            <li class="customTab">Title5</li>
+            <li class="customTab">Title6</li>
+            <li class="customTab">Title7</li>
+            <li class="customTab">Title8</li>
+            <li class="customTab">Title9</li>
+
+        </ul>
+        <ul class="customCon" style="width:100%;">
+            <li class="customList" >
+                <div class="schema_line">
+                    <span class="schema_title">Catalog</span>
+                    <select id="catalog_list"></select>
+                </div>
+
+                <div class="schema_line">
+                    <span class="schema_title">Schemas</span>
+                    <select id="schema_list"></select>
+                </div>
+
+                <div class="schema_line">
+                    <span class="schema_title">Tables</span>
+                    <select id="table_list"></select>
+                </div>
+
+                <div class="schema_line">
+                    <span class="schema_title">Columns</span>
+                    <textarea id="column_list"></textarea>
+                </div>
+
+            </li>
+            <li class="customList">
+                Executed History
+                <ul id="sql_history_list" style="width:100%; height:150px; overflow: auto;">
+                </ul>
+            </li>
+            <li class="customList">
+                Content3
+            </li>
+            <li class="customList">Content4</li>
+            <li class="customList">Content5</li>
+            <li class="customList">Content6</li>
+            <li class="customList">Content7</li>
+            <li class="customList">Content8</li>
+            <li class="customList">Content9</li>
+
+        </ul>
+    </div>
+
+    <div id="result_view">
+        <div style="background: #272C40; width:100%; height: 30px; color:white; padding: 5px 0 5px 20px;">
+            Run Result
+        </div>
+
+        <!--
+        <table id="dataframe" style="width:100%">
+            <thead>
+                <tr>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+        -->
+
+        <div id="dataframe2" style="width:100%; display:grid; overflow-x: auto;">
+            <ul class="table_head">
+                <!--
+                <li>헤더1</li>
+                <li>헤더2</li>
+                <li>헤더3</li>
+                -->
+            </ul>
+            <div class="body"></div>
+        <!--
+            <ul class="table_body">
+                <li>가가가1</li>
+                <li>나나나1</li>
+                <li>다다다1</li>
+            </ul>
+            <ul class="table_body">
+                <li>가가가2</li>
+                <li>나나나2</li>
+                <li>다다다2</li>
+            </ul>
+            -->
+        </div>
+    </div>
+</body>
+
+<script>
+function setLocalstorage( key, value ){
+    //console.log("localstorage : ", key, " : ", value );
+    localStorage.setItem( key, value );
+}
+
+function getLocalstorage( key ){
+    return localStorage.getItem( key );
+}
+
+function initUIEditor(){
+    var prevSql = getLocalstorage( 'sql');
+    if ( prevSql ){
+        //console.log("prev sql = ", prevSql );
+        $("#editor").text( prevSql );
+    }
+
+    // https://github.com/ajaxorg/ace
+    $('.my-code-area').ace({ theme: 'twilight', lang: 'ruby' })
+    // ACE Code Editor instance
+    //var editor = $('.my-code-area').data('ace').editor;
+    //console.log( editor.ace.getSession().getValue() );
+    //editor.ace.getSession().setValue("hello world \n 1234");
+}
+
+function initUITabMenu() {
+    $(".tabs").UblueTabs();
+    $(".custom").UblueTabs({
+        tabsTit: ".customTit",
+        tabsTab: ".customTab",
+        tabsCon: ".customCon",
+        tabsList: ".customList",
+        tabsHover: "customHover",
+        eventType: "click"
+    });
+}
+
+var g_catalog_list = null;
+var g_schema_list = null;
+var g_table_list = null;
+var g_column_list = null;
+
+var g_cur_catalog = null;
+var g_cur_schema = null;
+var g_cur_table = null;
+var g_cur_column = null;
+var g_sql_history_list = [];
+
+function setUISelectBoxContents( element_id, contents_list, default_value ){
+    var elEle = $("#" + element_id );
+    var html = "";
+    var value_list = getValueList( contents_list )
+    for ( var i = 0 ; i < value_list.length ; i++ ){
+        if ( default_value != null && value_list[i] == default_value ){
+            html += "<option selected>" + value_list[i] + "</option>";
+        }
+        else{
+            html += "<option>" + value_list[i] + "</option>";
+        }
+    }
+
+    elEle.empty().html( html );
+}
+
+function setUITextareaContents( element_id, contents_list ){
+    var elEle = $("#" + element_id );
+    var html = "";
+    var value_list = getValueList( contents_list )
+    for ( var i = 0 ; i < value_list.length ; i++ ){
+        html += value_list[i] ;
+        if ( i < value_list.length - 1 ) {
+            html += "\n";
+        }
+    }
+    elEle.empty().html( html );
+}
+
+function setUIList( element_id, contents_list ){
+
+    var elEle = $("#" + element_id );
+    var html = "";
+    for ( var i = contents_list.length-1 ; i >= 0 ; i-- ){
+        html += "<li style='height:30px;' data-idx='" + i + "'>" + contents_list[i].sql;
+        html += "<button type='button' class='btn btn-secondary btn-sm' id='history_rerun' style='font-size:11px;margin:0 5px 0 5px'>reRun</button>";
+        html += "<button type='button' class='btn btn-primary btn-sm' id='history_view' style='font-size:11px;'>Result View</button>";
+        html += "</li>";
+    }
+    elEle.empty().html( html );
+}
+
+function setUIDataFrame( element_id, contents_list ){
+
+    var elEleHeader = $("#" + element_id + " > thead > tr");
+    var elEleBody = $("#" + element_id  + " > tbody");
+
+    var html = "";
+    var header_list = Object.keys( contents_list[0] );
+    for( var i = 0 ; i < header_list.length ; i++ ){
+        html += "<th>" + header_list[i] + "</th>";
+    }
+    elEleHeader.empty().html( html );
+
+
+    html = "";
+    for( var i = 0 ; i < contents_list.length ; i++ ){
+        html += "<tr>";
+        for( var k = 0 ; k < header_list.length ; k++ ) {
+            html += "<td>" + contents_list[i][header_list[k]] + "</td>";
+        }
+        html += "</tr>";
+    }
+    elEleBody.empty().html( html );
+}
+
+function setUIDataFrame2( element_id, contents_list ){
+
+    var elEleHeader = $("#" + element_id + " .table_head");
+    var elEleBody = $("#" + element_id  + " .body");
+
+    var html = "";
+    var header_list = Object.keys( contents_list[0] );
+    for( var i = 0 ; i < header_list.length ; i++ ){
+        html += "<li style='font-weight: bold;'>" + header_list[i] + "</li>";
+    }
+    elEleHeader.empty().html( html );
+
+
+    html = "";
+    for( var i = 0 ; i < contents_list.length ; i++ ){
+        html += "<ul class='table_body'>";
+        for( var k = 0 ; k < header_list.length ; k++ ) {
+            html += "<li>" + contents_list[i][header_list[k]] + "</li>";
+        }
+        html += "</ul>";
+    }
+    elEleBody.empty().html( html );
+
+    elEleHeader.css( "grid-template-columns", "repeat("+ header_list.length + ", auto)" );
+    elEleBody.find(".table_body").css( "grid-template-columns", "repeat("+ header_list.length + ", auto)" );
+}
+
+function init_data(){
+
+    reqDataCatalog();
+    reqDataschema();
+    reqDataTable();
+    reqDataColumn();
+    reqDataDataframe();
+}
+
+function reqDataCatalog(){
+    reqeuestAjax( "/catalog", "GET", false, null, function ( res ){
+        g_catalog_list = res;
+        var prevCatalog = getLocalstorage("catalog");
+        g_cur_catalog = ( prevCatalog ) ? prevCatalog : g_catalog_list[0];
+        console.log( "catalog = ", g_catalog_list );
+
+        setUISelectBoxContents( "catalog_list", g_catalog_list, prevCatalog );
+    }, null, null );
+}
+
+function reqDataschema(){
+    reqeuestAjax( "/schema?catalog=" + g_cur_catalog, "GET", false, null, function ( res ){
+        g_schema_list = res;
+        var prevSchema = getLocalstorage("schema");
+        g_cur_schema =  ( prevSchema ) ? prevSchema : g_schema_list[0];
+        console.log( "schema = ", g_schema_list );
+        setUISelectBoxContents( "schema_list", g_schema_list, prevSchema );
+    }, null, null );
+}
+
+function reqDataTable(){
+    reqeuestAjax( "/table?catalog=" + g_cur_catalog + "&schema=" + g_cur_schema, "GET", false, null, function ( res ){
+        g_table_list = res;
+        var prevTable = getLocalstorage("table");
+        g_cur_table =  ( prevTable ) ? prevTable : g_table_list[0];
+        console.log( "table = ", g_table_list );
+        setUISelectBoxContents( "table_list", g_table_list, prevTable );
+    }, null, null );
+}
+
+function reqDataColumn(){
+    reqeuestAjax( "/column?catalog=" + g_cur_catalog + "&schema=" + g_cur_schema + "&table=" + g_cur_table, "GET", false, null, function ( res ){
+        g_column_list = res;
+        console.log( "column = ", res );
+        setUITextareaContents( "column_list", res );
+    }, null, null );
+}
+
+function reqDataDataframe(){
+
+    console.log("request dataframe ... ");
+    var column_list_str = getValueList( g_column_list ).join(",");
+    reqeuestAjax( "/dataframe?catalog=" + g_cur_catalog + "&schema=" + g_cur_schema + "&table=" + g_cur_table + "&column_list=" + column_list_str, "GET", false, null, function ( res ){
+        console.log( "dataframe = ", res );
+        //setUIDataFrame( "dataframe", res );
+        setUIDataFrame2( "dataframe2", res );
+    }, null, null );
+
+    console.log("request dataframe finish... ");
+
+}
+
+function reqDataSql( sql ){
+
+    console.log("[REQ] sql = ", sql );
+    reqeuestAjax( "/sql", "POST", true, { "sql" : sql }, function ( res ){
+        console.log( "[RES] sql dataframe = ", res );
+        //setUIDataFrame( "dataframe", res );
+        setUIDataFrame2( "dataframe2", res );
+
+        g_sql_history_list.push( { "sql" : sql, "dataframe" : res } );
+        setUIList( "sql_history_list", g_sql_history_list );
+
+        setLocalstorage("sql", sql );
+    }, null, null );
+
+}
+
+function getValueList( contents_list ){
+    var res = [];
+    var header_list = Object.keys( contents_list );
+    for( var i = 0 ; i < header_list.length ; i++ ){
+        res.push( contents_list[ header_list[i] ] );
+    }
+    return res;
+}
+
+function onChangeSelect( evt ){
+
+    var elTarget = $(evt.target);
+    var dataType = evt.data.type;
+    console.log( "[select] onchage : " + elTarget.val() + ", " + dataType );
+
+    if ( dataType == 'catalog' ){
+        g_cur_catalog = elTarget.val();
+        setLocalstorage( "catalog", g_cur_catalog );
+        //$("#schema_list").trigger("change");
+        reqDataschema();
+    }
+    else if ( dataType == 'schema' ){
+        g_cur_schema = elTarget.val();
+        setLocalstorage( "schema", g_cur_schema );
+
+        //$("#table_list").trigger("change");
+        reqDataTable();
+    }
+    else if ( dataType == 'table' ){
+        g_cur_table = elTarget.val();
+        setLocalstorage( "table", g_cur_table );
+
+        reqDataColumn();
+        reqDataDataframe();
+    }
+}
+
+function onClickRunSql( evt ){
+
+    var editor = $('.my-code-area').data('ace').editor;
+    var sql = editor.ace.getSession().getValue();
+
+    var isIncludeLimit = sql.toLowerCase().indexOf( "limit" ) >= 0;
+    if ( !isIncludeLimit ){
+        alert("입력 SQL에 Limit 구문은 필수입니다.");
+        return;
+    }
+
+    reqDataSql( sql );
+}
+
+function onClickRunHistory( evt ){
+    var elTarget = $(evt.target);
+    var elParent = elTarget.parent('li');
+    var historyIdx = elParent.data('idx');
+    var reqSql = g_sql_history_list[historyIdx].sql;
+    reqDataSql( reqSql );
+}
+
+function onClickViewHistory( evt ){
+    var elTarget = $(evt.target);
+    var elParent = elTarget.parent('li');
+    var historyIdx = elParent.data('idx');
+    var dataframe = g_sql_history_list[historyIdx].dataframe;
+    setUIDataFrame( "dataframe", dataframe );
+    console.log( "history dataframe ", dataframe );
+}
+
+function init_ui(){
+    initUIEditor();
+    initUITabMenu();
+}
+
+function init_event(){
+    $( document).on( "change", "#catalog_list", { type: "catalog"}, $.proxy( this.onChangeSelect, this ));
+    $( document).on( "change", "#schema_list", { type: "schema"}, $.proxy( this.onChangeSelect, this ));
+    $( document).on( "change", "#table_list", { type: "table"}, $.proxy( this.onChangeSelect, this ));
+
+    $( document).on( "click", "#run_sql", $.proxy( this.onClickRunSql, this ));
+    $( document).on( "click", "#history_rerun", $.proxy( this.onClickRunHistory, this ));
+    $( document).on( "click", "#history_view", $.proxy( this.onClickViewHistory, this ));
+}
+
+function reqeuestAjax( url, method, async, data, callBackSuccessFunc, callBackErrorFunc, headers ){
+
+    //console.log("access = ", Login.getAccessToken() )
+    $.ajax({
+        url : url,
+        type: method,
+        async : async,
+        contentType : 'application/json',
+        timeout : 5 * 1000,
+        data : data ? JSON.stringify(data) : {},
+        beforeSend : function(xhr){
+            if ( headers ){
+                for( var key in headers ){
+                    xhr.setRequestHeader( key, headers[key] );
+                }
+            }
+        },
+        success: function ( res ) {
+            if ( callBackSuccessFunc && typeof(callBackSuccessFunc) == "function") {
+                if ( typeof(res) == "object" ){
+                        callBackSuccessFunc(res);
+                    }
+            }
+        },
+        error: function ( xhr, ajaxOptions, thrownError) {
+            console.error( "error = " + xhr.status + " " + thrownError);
+        }
+    });
+}
+
+init_ui();
+init_event();
+setTimeout(function(){
+    init_data();
+}, 500);
+
+</script>
+</html>
