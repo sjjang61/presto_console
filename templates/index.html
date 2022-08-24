@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>DataGrip Faker</title>
+    <title>PrestoUI</title>
 
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='bootstrap/bootstrap.min.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/jqueryscripttop.css') }}">
@@ -16,7 +16,7 @@
     <script src="{{ url_for('static', filename='jquery-ace.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/Ublue-jQueryTabs-1.2.js') }}"></script>
     <script src="{{ url_for('static', filename='bootstrap/bootstrap.bundle.min.js') }}"></script>
-
+    <script src="{{ url_for('static', filename='js/js-utils.js') }}"></script>
 
     <style>
 
@@ -274,8 +274,9 @@ function setUIList( element_id, contents_list ){
     var html = "";
     for ( var i = contents_list.length-1 ; i >= 0 ; i-- ){
         html += "<li style='height:30px;' data-idx='" + i + "'>" + contents_list[i].sql;
-        html += "<button type='button' class='btn btn-secondary btn-sm' id='history_rerun' style='font-size:11px;margin:0 5px 0 5px'>reRun</button>";
-        html += "<button type='button' class='btn btn-primary btn-sm' id='history_view' style='font-size:11px;'>Result View</button>";
+        html += "( " + contents_list[i].date + " )";
+        html += "<button type='button' class='btn btn-secondary btn-sm' id='history_rerun' style='font-size:11px;margin:0 5px 0 5px'>reRun</button> ";
+        html += "<button type='button' class='btn btn-primary btn-sm' id='history_view' style='font-size:11px;'>Result View</button> ";
         html += "</li>";
     }
     elEle.empty().html( html );
@@ -334,6 +335,8 @@ function setUIDataFrame2( element_id, contents_list ){
 
 function init_data(){
 
+    loadHistoryData();
+
     reqDataCatalog();
     reqDataschema();
     reqDataTable();
@@ -341,8 +344,18 @@ function init_data(){
     reqDataDataframe();
 }
 
+function loadHistoryData(){
+
+    var json_str = getLocalstorage("history");
+    if ( json_str ){
+        g_sql_history_list = JSON.parse( json_str );
+        console.log("[LOAD] history = ",  g_sql_history_list );
+        setUIList( "sql_history_list", g_sql_history_list );
+    }
+}
+
 function reqDataCatalog(){
-    reqeuestAjax( "/catalog", "GET", false, null, function ( res ){
+    reqAjax( "/catalog", "GET", false, null, function ( res ){
         g_catalog_list = res;
         var prevCatalog = getLocalstorage("catalog");
         g_cur_catalog = ( prevCatalog ) ? prevCatalog : g_catalog_list[0];
@@ -353,7 +366,7 @@ function reqDataCatalog(){
 }
 
 function reqDataschema(){
-    reqeuestAjax( "/schema?catalog=" + g_cur_catalog, "GET", false, null, function ( res ){
+    reqAjax( "/schema?catalog=" + g_cur_catalog, "GET", false, null, function ( res ){
         g_schema_list = res;
         var prevSchema = getLocalstorage("schema");
         g_cur_schema =  ( prevSchema ) ? prevSchema : g_schema_list[0];
@@ -363,7 +376,7 @@ function reqDataschema(){
 }
 
 function reqDataTable(){
-    reqeuestAjax( "/table?catalog=" + g_cur_catalog + "&schema=" + g_cur_schema, "GET", false, null, function ( res ){
+    reqAjax( "/table?catalog=" + g_cur_catalog + "&schema=" + g_cur_schema, "GET", false, null, function ( res ){
         g_table_list = res;
         var prevTable = getLocalstorage("table");
         g_cur_table =  ( prevTable ) ? prevTable : g_table_list[0];
@@ -373,7 +386,7 @@ function reqDataTable(){
 }
 
 function reqDataColumn(){
-    reqeuestAjax( "/column?catalog=" + g_cur_catalog + "&schema=" + g_cur_schema + "&table=" + g_cur_table, "GET", false, null, function ( res ){
+    reqAjax( "/column?catalog=" + g_cur_catalog + "&schema=" + g_cur_schema + "&table=" + g_cur_table, "GET", false, null, function ( res ){
         g_column_list = res;
         console.log( "column = ", res );
         setUITextareaContents( "column_list", res );
@@ -384,7 +397,7 @@ function reqDataDataframe(){
 
     console.log("request dataframe ... ");
     var column_list_str = getValueList( g_column_list ).join(",");
-    reqeuestAjax( "/dataframe?catalog=" + g_cur_catalog + "&schema=" + g_cur_schema + "&table=" + g_cur_table + "&column_list=" + column_list_str, "GET", false, null, function ( res ){
+    reqAjax( "/dataframe?catalog=" + g_cur_catalog + "&schema=" + g_cur_schema + "&table=" + g_cur_table + "&column_list=" + column_list_str, "GET", false, null, function ( res ){
         console.log( "dataframe = ", res );
         //setUIDataFrame( "dataframe", res );
         setUIDataFrame2( "dataframe2", res );
@@ -397,14 +410,20 @@ function reqDataDataframe(){
 function reqDataSql( sql ){
 
     console.log("[REQ] sql = ", sql );
-    reqeuestAjax( "/sql", "POST", true, { "sql" : sql }, function ( res ){
+    reqAjax( "/sql", "POST", true, { "sql" : sql }, function ( res ){
         console.log( "[RES] sql dataframe = ", res );
         //setUIDataFrame( "dataframe", res );
         setUIDataFrame2( "dataframe2", res );
 
-        g_sql_history_list.push( { "sql" : sql, "dataframe" : res } );
+        var MAX_HISTORY_CNT = 100;
+        if ( g_sql_history_list.length >= MAX_HISTORY_CNT ){
+            // 가장 오래된 정보 삭제
+            g_sql_history_list.splice( 0, 1);
+        }
+        g_sql_history_list.push( { "sql" : sql, "dataframe" : res, "date" : (new Date()).format( "yyyy-MM-dd hh:mm:ss") } );
         setUIList( "sql_history_list", g_sql_history_list );
 
+        setLocalstorage("history", JSON.stringify( g_sql_history_list ));
         setLocalstorage("sql", sql );
     }, null, null );
 
@@ -493,7 +512,7 @@ function init_event(){
     $( document).on( "click", "#history_view", $.proxy( this.onClickViewHistory, this ));
 }
 
-function reqeuestAjax( url, method, async, data, callBackSuccessFunc, callBackErrorFunc, headers ){
+function reqAjax( url, method, async, data, callBackSuccessFunc, callBackErrorFunc, headers ){
 
     //console.log("access = ", Login.getAccessToken() )
     $.ajax({
