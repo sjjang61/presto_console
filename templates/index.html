@@ -493,7 +493,7 @@ function onClickViewHistory( evt ){
     var elParent = elTarget.parent('li');
     var historyIdx = elParent.data('idx');
     var dataframe = g_sql_history_list[historyIdx].dataframe;
-    setUIDataFrame( "dataframe", dataframe );
+    setUIDataFrame2( "dataframe2", dataframe );
     console.log( "history dataframe ", dataframe );
 }
 
