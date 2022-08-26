@@ -1,0 +1,1 @@
+nohup python3 PrestoGatewayServer.py > log.debug &
