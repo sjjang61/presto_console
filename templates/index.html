@@ -4,18 +4,17 @@
     <meta charset="UTF-8">
     <title>PrestoUI</title>
 
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='bootstrap/bootstrap.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/bootstrap/bootstrap.min.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/jqueryscripttop.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/tabui.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/jquery-tabs/tabui.css') }}">
 
-    <script src="{{ url_for('static', filename='jquery/jquery-1.8.3.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='jquery/jquery-1.8.3.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='ace/ace.js') }}"></script>
-    <script src="{{ url_for('static', filename='ace/theme-twilight.js') }}"></script>
-    <script src="{{ url_for('static', filename='ace/mode-ruby.js') }}"></script>
-    <script src="{{ url_for('static', filename='jquery-ace.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/Ublue-jQueryTabs-1.2.js') }}"></script>
-    <script src="{{ url_for('static', filename='bootstrap/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='assets/jquery/jquery-1.8.3.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='assets/jquery-ace/ace/ace.js') }}"></script>
+    <script src="{{ url_for('static', filename='assets/jquery-ace/ace/theme-twilight.js') }}"></script>
+    <script src="{{ url_for('static', filename='assets/jquery-ace/ace/mode-ruby.js') }}"></script>
+    <script src="{{ url_for('static', filename='assets/jquery-ace/jquery-ace.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='assets/jquery-tabs/Ublue-jQueryTabs-1.2.js') }}"></script>
+    <script src="{{ url_for('static', filename='assets/bootstrap/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/js-utils.js') }}"></script>
 
     <style>
@@ -497,6 +496,37 @@ function onClickViewHistory( evt ){
     console.log( "history dataframe ", dataframe );
 }
 
+function isJsonStr(str) {
+    try {
+        var json = JSON.parse(str);
+        return (typeof json === 'object');
+    } catch (e) {
+        return false;
+    }
+}
+
+function openWindowPop(url, name){
+    var options = 'top=10, left=10, width=500, height=600, status=no, menubar=no, toolbar=no, resizable=no';
+    return window.open( url, name, options );
+}
+
+function onDblClickTableCell( evt ){
+    var elTarget = $(evt.target);
+    var content = elTarget.text();
+    var isJson = isJsonStr( content );
+
+    if ( isJson ){
+        var popupWindow = openWindowPop( '/popup', 'popup' );
+        var json_obj = JSON.parse( content );
+        //var json_str_beautifier = JSON.stringify( json_obj, null, "\t");
+
+        setTimeout(function(){
+            popupWindow.document.getElementById("json-input").innerText = content;
+            popupWindow.renderJson();
+        }, 500);
+    }
+}
+
 function init_ui(){
     initUIEditor();
     initUITabMenu();
@@ -510,6 +540,8 @@ function init_event(){
     $( document).on( "click", "#run_sql", $.proxy( this.onClickRunSql, this ));
     $( document).on( "click", "#history_rerun", $.proxy( this.onClickRunHistory, this ));
     $( document).on( "click", "#history_view", $.proxy( this.onClickViewHistory, this ));
+
+    $( document).on( "dblclick", "ul.table_body li", $.proxy( this.onDblClickTableCell, this ));
 }
 
 function reqAjax( url, method, async, data, callBackSuccessFunc, callBackErrorFunc, headers ){
