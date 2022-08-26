@@ -11,7 +11,7 @@
     <script src="{{ url_for('static', filename='assets/jquery/jquery-1.8.3.min.js') }}"></script>
     <script src="{{ url_for('static', filename='assets/jquery-ace/ace/ace.js') }}"></script>
     <script src="{{ url_for('static', filename='assets/jquery-ace/ace/theme-twilight.js') }}"></script>
-    <script src="{{ url_for('static', filename='assets/jquery-ace/ace/mode-ruby.js') }}"></script>
+    <script src="{{ url_for('static', filename='assets/jquery-ace/ace/mode-sql.js') }}"></script>
     <script src="{{ url_for('static', filename='assets/jquery-ace/jquery-ace.min.js') }}"></script>
     <script src="{{ url_for('static', filename='assets/jquery-tabs/Ublue-jQueryTabs-1.2.js') }}"></script>
     <script src="{{ url_for('static', filename='assets/bootstrap/bootstrap.bundle.min.js') }}"></script>
@@ -208,7 +208,7 @@ function initUIEditor(){
     }
 
     // https://github.com/ajaxorg/ace
-    $('.my-code-area').ace({ theme: 'twilight', lang: 'ruby' })
+    $('.my-code-area').ace({ theme: 'twilight', lang: 'sql' })
     // ACE Code Editor instance
     //var editor = $('.my-code-area').data('ace').editor;
     //console.log( editor.ace.getSession().getValue() );
@@ -322,7 +322,13 @@ function setUIDataFrame2( element_id, contents_list ){
     for( var i = 0 ; i < contents_list.length ; i++ ){
         html += "<ul class='table_body'>";
         for( var k = 0 ; k < header_list.length ; k++ ) {
-            html += "<li>" + contents_list[i][header_list[k]] + "</li>";
+            var content = contents_list[i][header_list[k]];
+            if ( isObject( content ) ){
+                html += "<li>" + JSON.stringify( content ) + "</li>"
+            }
+            else{
+                html += "<li>" + content + "</li>";
+            }
         }
         html += "</ul>";
     }
@@ -500,6 +506,15 @@ function isJsonStr(str) {
     try {
         var json = JSON.parse(str);
         return (typeof json === 'object');
+    } catch (e) {
+        return false;
+    }
+}
+
+function isObject(str) {
+    try {
+        //var json = JSON.parse(str);
+        return (typeof str === 'object');
     } catch (e) {
         return false;
     }

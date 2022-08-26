@@ -135,7 +135,7 @@ def select_dataframe():
 
     if is_local_test == True:
         dataframe = [
-            { "column01" : 111, "column02" : 222, "column03" : 333, "column04" : 444, "column05" : "{ \"age\" : 10, \"name\" : \"Abc\", \"list\" : [ { \"subject\" : \"math\" }, {\"subject\" : \"korean\"}] }",
+            { "column01" : 111, "column02" : 222, "column03" : 333, "column04" : 444, "column05" : { "age" : 10, "name" : "Abc", "list" : [ { "subject" : "math" }, { "subject" : "korean"}] },
               "column06" : 111, "column07" : 222, "column08" : 333, "column09" : 444, "column10" : 555,
               "column11" : 111, "column12" : 222, "column13" : 333, "column14" : 444, "column15" : 555,
               "column16" : 111, "column17" : 222, "column18" : 333, "column19" : 444, "column20" : 555,
@@ -144,8 +144,8 @@ def select_dataframe():
               "column31": 111, "column32": 222, "column33": 333, "column34": 444, "column35": 555,
               "column36": 111, "column37": 222, "column38": 333, "column39": 444, "column40": 555
               },
-            { "column01" : 111, "column02" : 222, "column03" : 333, "column04" : 444, "column05" : "{ \"list\" : [ { \"subject\" : \"math\" }, {\"subject\" : \"korean\"}] }",
-              "column06" : 111, "column07" : 222, "column08" : 333, "column09" : 444, "column10" : 555,
+            { "column01" : 111, "column02" : 222, "column03" : 333, "column04" : 444, "column05" : { "list" : [ { "subject" : "math" }, {"subject" : "korean"}] },
+              "column06" : 111, "column07" : 222, "column08" : 333, "column09" : 444, "column10" : { "a" : { "b": 100 }, "b" : [ 10, 20] },
               "column11" : 111, "column12" : 222, "column13" : 333, "column14" : 444, "column15" : 555,
               "column16" : 111, "column17" : 222, "column18" : 333, "column19" : 444, "column20" : 555,
               "column21": 111, "column22": 222, "column23": 333, "column24": 444, "column25": 555,
